@@ -394,6 +394,10 @@ public:
             size++;
             temp_size = temp_size->getPtr();
         }
+        if (size == 1)
+        {
+            return;
+        }
         if (val > size)
         {
             val = val % size;
@@ -446,6 +450,12 @@ public:
      */
     void __print__() const
     {
+        // if head is NULL Print NULL
+        if (head_ptr == NULL)
+        {
+            cout << "NULL" << endl;
+            return;
+        }
         Node<dataType> *temp = head_ptr;
         while (temp != NULL) // takes n times.
         {
