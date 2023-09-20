@@ -114,8 +114,9 @@ public:
      */
     ~Node() // takes Zero time.
     {
-        // delete ptr; // takes O(1) time.
-        // delete val; // takes O(1) time.
+        ptr = NULL;
+        // Handled in the Sorted_Set Class.
+        // To prevent Double Deletion.
     }
 };
 
@@ -137,6 +138,28 @@ class Sorted_Set
 private:
     Node<dataType> *head_ptr;
     Node<dataType> *tail_ptr;
+
+    /**
+     * @brief Function to append the Node to the Result Linked List.
+     * @brief Time Complexity: 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + ... = O(n).
+     * @brief It is only supposed to be a helper function of the __union__ function.
+     * @param prevResult is the pointer to the last Node of the Result Linked List.
+     * @param node is the pointer to the Node to be appended to the Result Linked List.
+     * @return void - No Value.
+     */
+    void appendToResult(Node<dataType> *&prevResult, Node<dataType> *&node)
+    {
+        if (prevResult == NULL)
+        {
+            this->head_ptr = node;
+            prevResult = node;
+        }
+        else
+        {
+            prevResult->setPtr(node);
+            prevResult = node;
+        }
+    }
 
 public:
     /**
@@ -167,7 +190,7 @@ public:
 
     /**
      * @brief Function to insert the given value in the Sorted_Set. The values will be in Ascending Order.
-     * @brief No Duplicates are allowed.
+     * @brief No Duplicates are allowed. The time complexity is O(n).
      * @param data is the value to be inserted in the Sorted_Set. It can be of any dataType.
      */
     void __insert_val__(dataType const data)
@@ -213,7 +236,7 @@ public:
     /**
      * @brief Function to delete the value present at the given index.
      * @brief It will remove the Extra Node created on Heap.
-     * @brief Time Complexity: 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + ... + n = 10 + n = O(n).
+     * @brief Time Complexity: 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + ... + n + n + n = 10 + 3n = O(n).
      * @param index is the index of the value to be deleted.
      */
     void __delete_val__(int const index)
@@ -228,6 +251,22 @@ public:
             head_ptr = head_ptr->getPtr();
             temp->setPtr(NULL);
             delete temp;
+            Node<dataType> *temp2 = head_ptr; // 1 time.
+            if (head_ptr == NULL)             // 1 time.
+            {
+                tail_ptr = NULL;
+                return;
+            }
+            // point the tail ptr to end of the Linked List.
+            while (temp2 != NULL) // n times. ie the size of the Linked List. As we have to traverse the whole Linked List.
+            {
+                if (temp2->getPtr() == NULL) // 1 time.
+                {
+                    tail_ptr = temp2;
+                    return;
+                }
+                temp2 = temp2->getPtr();
+            }
         }
         else
         {
@@ -247,6 +286,18 @@ public:
                 temp = temp->getPtr();
                 i++;
             }
+            // point the tail ptr to end of the Linked List.
+            Node<dataType> *temp2 = head_ptr; // 1 time.
+
+            while (temp2 != NULL) // n times. ie the size of the Linked List. As we have to traverse the whole Linked List.
+            {
+                if (temp2->getPtr() == NULL) // 1 time.
+                {
+                    tail_ptr = temp2;
+                    return;
+                }
+                temp2 = temp2->getPtr();
+            }
         }
     }
 
@@ -254,42 +305,70 @@ public:
      * @brief Function to take the union of the two Sorted_Sets.
      * @brief It will take the union of the two Sorted_Sets and store it in the first Sorted_Set.
      * @brief The values will be in Ascending Order. No Duplicates are allowed.
-     * @brief Time Complexity: n * n =O(n^2).
+     * @brief Time Complexity: n = O(n).
      * @brief For example:
      * @brief SortedSet a: (suppose it has 1, 2, 3, 4, 10, 50).
      * @brief Now, SortedSet b: (suppose it has 6, 10, 11).
      * @brief Function: a.__union__(b); (a will now contain 1, 2, 3, 4, 6, 10, 11, 50).
+     * @param otherSet is the Sorted_Set to be taken union with.
+     * @return void - No Value.
      */
-    void __union__(Sorted_Set<dataType> const &otherSet)
+    void __union__(Sorted_Set<dataType> &otherSet)
     {
-        Node<dataType> *temp = otherSet.head_ptr;
-        while (temp != NULL) // takes n times.
-        {
-            __insert_val__(temp->getVal()); // __insert_val__ takes O(n) time.
-            temp = temp->getPtr();
-        }
-    }
 
-    /**
-     * @brief Print the values of the Sorted_Set.
-     * @brief Time Complexity: n = O(n).
-     */
-    void __print__() const
-    {
-        Node<dataType> *temp = head_ptr;
-        while (temp != NULL) // takes n times.
+        Node<dataType> *temp1 = this->head_ptr;
+        Node<dataType> *temp2 = otherSet.head_ptr;
+        Node<dataType> *prevResult = NULL;
+        this->head_ptr = NULL;
+        this->tail_ptr = NULL;
+
+        while (temp1 != NULL || temp2 != NULL) // takes n times. ie the size of the Linked List. As we have to traverse the whole Linked List.
         {
-            temp->print();
-            cout << " -> ";
-            temp = temp->getPtr();
+            if (temp1 == NULL)
+            {
+                appendToResult(prevResult, temp2);
+                break;
+            }
+            else if (temp2 == NULL)
+            {
+                appendToResult(prevResult, temp1);
+                break;
+            }
+            else if (temp1->getVal() < temp2->getVal())
+            {
+                appendToResult(prevResult, temp1);
+                temp1 = temp1->getPtr();
+            }
+            else if (temp1->getVal() > temp2->getVal())
+            {
+                appendToResult(prevResult, temp2);
+                temp2 = temp2->getPtr();
+            }
+            else
+            {
+                // Duplicate values, include only once
+                appendToResult(prevResult, temp1);
+                temp1 = temp1->getPtr();
+                temp2 = temp2->getPtr();
+            }
         }
-        cout << "NULL";
-        cout << endl;
+
+        // point the tail ptr to end of the Linked List.
+        Node<dataType> *temp3 = this->head_ptr;
+        while (temp3 != NULL)
+        {
+            if (temp3->getPtr() == NULL)
+            {
+                this->tail_ptr = temp3;
+                return;
+            }
+            temp3 = temp3->getPtr();
+        }
     }
 
     /**
      * @brief Rotate the List Counter Clockwise by the given value.
-     * @brief Time Complexity: n = O(n). Not Sure, about this one as the same function is being called recursively.
+     * @brief Time Complexity: n + n = 2n = O(n).
      * @param val is the value to rotate the List Counter Clockwise.
      */
     void __rotate__(int val)
@@ -307,6 +386,18 @@ public:
             cout << "The List is Empty." << endl;
             return;
         }
+        // calculate the size of the Linked List.
+        Node<dataType> *temp_size = head_ptr;
+        int size = 0;
+        while (temp_size != NULL)
+        {
+            size++;
+            temp_size = temp_size->getPtr();
+        }
+        if (val > size)
+        {
+            val = val % size;
+        }
         Node<dataType> *temp = head_ptr;
         Node<dataType> *prev = NULL;
         int i = 0;
@@ -323,7 +414,6 @@ public:
             temp = temp->getPtr();
             i++;
         }
-        __rotate__(val % i);
     }
 
     /**
@@ -350,10 +440,26 @@ public:
         head_ptr = prev;
     }
 
+    /**
+     * @brief Print the values of the Sorted_Set.
+     * @brief Time Complexity: n = O(n).
+     */
+    void __print__() const
+    {
+        Node<dataType> *temp = head_ptr;
+        while (temp != NULL) // takes n times.
+        {
+            temp->print();
+            temp = temp->getPtr();
+        }
+        cout << endl;
+    }
+
     ~Sorted_Set() // takes O(1) time.
     {
-        delete head_ptr;
-        // delete tail_ptr;
+        delete head_ptr; // takes O(1) time.
+        tail_ptr = NULL; // takes O(1) time.
+        head_ptr = NULL; // takes O(1) time.
     }
 };
 
