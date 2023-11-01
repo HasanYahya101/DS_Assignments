@@ -1,8 +1,9 @@
-# This README File is to let you know a couple of things.
+### This README File is to let you know a couple of things.
 
-### Note: The Question 2 (Radiix Sort) is done for both numbers and alphabets (using string), that is why there are 2 files for Question 2.
+__Note:__ _The Question 2 (Radiix Sort) is done for both numbers and alphabets (using string), that is why there are 2 files for Question 2._
 
-### Note: The README File along with the devalopment environment and the Static SFML Libaries are given in Releases (only for Question 1).
+__Note:__ _The README File along with the devalopment environment and the Static SFML Libaries are given in Releases (only for Question 1)._
+
 
 __The MakeFile is as follows:__
 ```
