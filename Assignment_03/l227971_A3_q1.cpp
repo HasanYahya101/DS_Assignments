@@ -271,13 +271,35 @@ int main()
     cout << "Your queue will have the following members: " << endl;
     queue.print();
     cout << endl;
-    cout << "Enter the Number you want to start from: ";
-    int start;
-    cin >> start;
-    while (start < 1 || start > size)
+    cout << "M is for Manual and R is for Random" << endl;
+    cout << "Do you want to Give the Start Number or should it be selected Randomly (M/R): ";
+    string choice_start;
+    cin >> choice_start;
+    while (choice_start != "M" && choice_start != "R")
     {
-        cout << "Error: Enter a Number Between 1 and " << size << endl;
+        cout << "Error: Enter M or R!" << endl;
+        cin >> choice_start;
+    }
+    int start;
+    if (choice_start == "R")
+    {
+        srand(time(NULL));
+        start = rand() % (size / 2) + 1;
+        cout << "The Start Number is: " << start << endl;
+    }
+    else if (choice_start == "M")
+    {
+
+        cout << "Enter the Number you want to start from: ";
+        start;
         cin >> start;
+        while (start < 1 || start > size)
+        {
+            cout << "Error: Enter a Number Between 1 and " << size << endl;
+            cin >> start;
+        }
+
+        cout << "The Start Number is: " << start << endl;
     }
     for (int i = 1; i < start; i++)
     {
@@ -320,6 +342,9 @@ int main()
     cout << endl;
     int winner_id = queue.pop();
     cout << "The last member to survive is: " << winner_id << endl;
+
+    cout << endl;
+    system("pause");
 
     RenderWindow window(VideoMode(1300, 900), "Josephus Problem", Style::Titlebar | Style::Close);
     // placing window in the middle of the screen
