@@ -5,8 +5,8 @@ CXX := g++
 CXXFLAGS := -std=c++17 #-Wall -Wextra -pedantic -g
 
 # SFML include and library directories
-SFML_INCLUDE := -I "C:\Users\Digitify\Downloads\SFML-2.6.0\include"
-SFML_LIB := -L "C:\Users\Digitify\Downloads\SFML-2.6.0\build\lib"
+SFML_INCLUDE := -I "Add your own path here is comments"
+SFML_LIB := -L "Add your own path here in comments"
 
 # SFML libraries (static versions)
 # SFML_LIBS := -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lwinmm -lgdi32 -lsfml-system-s -lsfml-audio-s
