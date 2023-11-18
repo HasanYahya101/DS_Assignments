@@ -22,13 +22,6 @@ public:
 
 template <typename Type>
 
-// Note: Queue is only being made to test the level order traversal of the tree,
-// This makes me able to test if the tree is balanced or not.
-// It is not being used in the major functionality at all.
-// Only trees are being used in the major functionality.
-// Note: That Time complexity for major functionalities specially searching is O(logn) with a base of 2, because of AVL Rotation.
-// This means if i have a billion links with unique ids, it will take log(1000000000) = 30 steps to find a link.
-
 class queue
 {
 private:
@@ -337,28 +330,6 @@ public:
 
         int balance = getBalance(node);
 
-        if (balance > 1 && link.id < node->left->data.id)
-        {
-            return rightRotate(node);
-        }
-
-        if (balance < -1 && link.id > node->right->data.id)
-        {
-            return leftRotate(node);
-        }
-
-        if (balance > 1 && link.id > node->left->data.id)
-        {
-            node->left = leftRotate(node->left);
-            return rightRotate(node);
-        }
-
-        if (balance < -1 && link.id < node->right->data.id)
-        {
-            node->right = rightRotate(node->right);
-            return leftRotate(node);
-        }
-
         return node;
     }
 
@@ -372,34 +343,6 @@ public:
 
         // recursive function
         root = insert(root, link);
-    }
-
-    Node<Link> *rightRotate(Node<Link> *node)
-    {
-        Node<Link> *left = node->left;
-        Node<Link> *leftRight = left->right;
-
-        left->right = node;
-        node->left = leftRight;
-
-        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
-        left->height = 1 + max(getHeight(left->left), getHeight(left->right));
-
-        return left;
-    }
-
-    Node<Link> *leftRotate(Node<Link> *node)
-    {
-        Node<Link> *right = node->right;
-        Node<Link> *rightLeft = right->left;
-
-        right->left = node;
-        node->right = rightLeft;
-
-        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
-        right->height = 1 + max(getHeight(right->left), getHeight(right->right));
-
-        return right;
     }
 
     string search(int key)
@@ -610,6 +553,130 @@ public:
         size = 0;
     }
 
+    bool delete_word(string word)
+    {
+        // delete a word from the tree
+        Node<Word> *current = root;
+        Node<Word> *parent = root;
+        bool is_left = true;
+
+        if (current == NULL)
+        {
+            return false;
+        }
+
+        while (current->data.word != word)
+        {
+            parent = current;
+            if (word < current->data.word)
+            {
+                is_left = true;
+                current = current->left;
+            }
+            else
+            {
+                is_left = false;
+                current = current->right;
+            }
+
+            if (current == NULL)
+            {
+                return false;
+            }
+        }
+
+        // if node is a leaf
+        if (current->left == NULL && current->right == NULL)
+        {
+            if (current == root)
+            {
+                root = NULL;
+            }
+            else if (is_left)
+            {
+                parent->left = NULL;
+            }
+            else
+            {
+                parent->right = NULL;
+            }
+        }
+        // if node has one child that is on the left
+        else if (current->right == NULL)
+        {
+            if (current == root)
+            {
+                root = current->left;
+            }
+            else if (is_left)
+            {
+                parent->left = current->left;
+            }
+            else
+            {
+                parent->right = current->left;
+            }
+        }
+        // if node has one child that is on the right
+        else if (current->left == NULL)
+        {
+            if (current == root)
+            {
+                root = current->right;
+            }
+            else if (is_left)
+            {
+                parent->left = current->right;
+            }
+            else
+            {
+                parent->right = current->right;
+            }
+        }
+        // if node has two children
+        else
+        {
+            Node<Word> *successor = get_successor(current);
+            if (current == root)
+            {
+                root = successor;
+            }
+            else if (is_left)
+            {
+                parent->left = successor;
+            }
+            else
+            {
+                parent->right = successor;
+            }
+            successor->left = current->left;
+        }
+        size--;
+        return true;
+    }
+
+    Node<Word> *get_successor(Node<Word> *node)
+    {
+        Node<Word> *current = node->right;
+        Node<Word> *parent = node;
+        Node<Word> *successor = node;
+
+        while (current != NULL)
+        {
+            parent = successor;
+            successor = current;
+            current = current->left;
+        }
+
+        if (successor != node->right)
+        {
+            parent->left = successor->right;
+            successor->right = node->right;
+        }
+
+        return successor;
+    }
+
     bool already_exist(string key, int link_id)
     {
         // If an ID already exists in the tree, return true after inserting the link_id into that word
@@ -658,32 +725,6 @@ public:
             return node;
         }
 
-        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
-
-        int balance = getBalance(node);
-
-        if (balance > 1 && word_new.word < node->left->data.word)
-        {
-            return rightRotate(node);
-        }
-
-        if (balance < -1 && word_new.word > node->right->data.word)
-        {
-            return leftRotate(node);
-        }
-
-        if (balance > 1 && word_new.word > node->left->data.word)
-        {
-            node->left = leftRotate(node->left);
-            return rightRotate(node);
-        }
-
-        if (balance < -1 && word_new.word < node->right->data.word)
-        {
-            node->right = rightRotate(node->right);
-            return leftRotate(node);
-        }
-
         return node;
     }
 
@@ -697,34 +738,6 @@ public:
 
         // recursive function
         root = insert(root, word_new);
-    }
-
-    Node<Word> *rightRotate(Node<Word> *node)
-    {
-        Node<Word> *left = node->left;
-        Node<Word> *leftRight = left->right;
-
-        left->right = node;
-        node->left = leftRight;
-
-        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
-        left->height = 1 + max(getHeight(left->left), getHeight(left->right));
-
-        return left;
-    }
-
-    Node<Word> *leftRotate(Node<Word> *node)
-    {
-        Node<Word> *right = node->right;
-        Node<Word> *rightLeft = right->left;
-
-        right->left = node;
-        node->right = rightLeft;
-
-        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
-        right->height = 1 + max(getHeight(right->left), getHeight(right->right));
-
-        return right;
     }
 
     queue<int> search(string key)
@@ -1038,7 +1051,46 @@ int main()
 
     // links.test_balance_and_print(); // Testing the Balance of Tree, remove comments to check
     // words.test_balance_and_print(); // Testing the Balance of Tree, remove comments to check
-    //  system("pause"); // to pause and view tree balance before continuing
+    // system("pause"); // to pause and view tree balance before continuing
+    cout << "Do you want to delete a word? (y/n): ";
+    string delete_word_choice;
+    getline(cin, delete_word_choice);
+    while (delete_word_choice != "y" && delete_word_choice != "n")
+    {
+        cout << "Invalid Choice, Do you want to delete a word? (y/n): ";
+        getline(cin, delete_word_choice);
+    }
+
+    if (delete_word_choice == "y")
+    {
+        cout << "Enter Word to Delete: ";
+        string word_to_delete;
+        getline(cin, word_to_delete);
+        while (word_to_delete == "" || word_to_delete.find(" ") != string::npos)
+        {
+            cout << "\nWord cannot be empty or contain spaces, Enter Word to Delete: ";
+            getline(cin, word_to_delete);
+        }
+        cout << endl
+             << endl;
+        bool value = words.delete_word(word_to_delete);
+        if (value)
+        {
+            cout << "Word Deleted Successfully" << endl;
+        }
+        else
+        {
+            cout << "Word not found in any link" << endl;
+        }
+        cout << endl
+             << endl;
+    }
+
+    // tp test word deletion
+    // words.test_balance_and_print(); // Testing the Balance of Tree, remove comments to check
+    // system("pause");                // to pause and view tree balance before continuing
+    // cout << endl << endl;
+
     cout << "Enter Word to Search: ";
     string word_to_search;
     getline(cin, word_to_search);
